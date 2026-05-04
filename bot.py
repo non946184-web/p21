@@ -316,9 +316,31 @@ async def cmd_reset(message: Message):
     await message.answer("✅ Все данные сброшены")
     logger.info(f"Админ {message.from_user.id} сбросил данные")
 
+async def auto_update_schedule():
+    while True:
+        try:
+            logger.info("🔄 Автообновление расписания...")
+
+            today = date.today()
+            lessons = parser.get_timetable(today)
+
+            if lessons:
+                logger.info(f"✅ Обновлено: {len(lessons)} пар")
+            else:
+                logger.warning("⚠️ Не удалось обновить расписание")
+
+        except Exception as e:
+            logger.error(f"❌ Ошибка автообновления: {e}")
+
+        await asyncio.sleep(1800)  # каждые 30 минут
+
 # Запуск бота
 async def main():
     logger.info("Бот запускается...")
+
+    # запускаем автообновление в фоне
+    asyncio.create_task(auto_update_schedule())
+
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
